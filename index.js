@@ -8,9 +8,6 @@ server.use(express.json());
 // PROJECTS END POINTS///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 server.get("/api/projects", (req, res) => {
-
-
-
   Projects.get()
     .then(projects => {
       res.status(200).json(projects);
@@ -69,7 +66,7 @@ server.delete("/api/projects/:id", (req, res) => {
 
 // ACTIONS END POINTS ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-server.get("/api/projects/:id/actions", (req, res) => {
+server.get("/api/projects/:id/actions",  actionExists, (req, res) => {
   const id = req.params.id;
 
   Projects.getProjectActions(id)
@@ -81,22 +78,33 @@ server.get("/api/projects/:id/actions", (req, res) => {
     });
 });
 
-server.post('/api/projects/:id/actions', (req, res) => {
-    const id = req.params.id
-    const projectData = req.body
+server.post("/api/projects/:id/actions", actionExists, (req, res) => {
+  const id = req.params.id;
+  const projectData = req.body;
 
-if(!projectData.project_id || !projectData.description || !projectData.notes) {
-    res.status(400).json({message: 'notes, desc, and project id are all required'})
-}
+  if (
+    !projectData.project_id ||
+    !projectData.description ||
+    !projectData.notes
+  ) {
+    res
+      .status(400)
+      .json({ message: "notes, desc, and project id are all required" });
+  }
 
-    Actions.insert(projectData).then(project => {
-        res.json(project)
+  Actions.insert(projectData)
+    .then(project => {
+      res.json(project);
     })
     .catch(error => {
-        res.status(500).json({error: 'error posting acion'})
-    })
+      res.status(500).json({ error: "error posting acion" });
+    });
+});
 
-    
-})
+function actionExists(req, res,next ) {
+  const postId = req.params.id
+  Projects.get(postId)
+  .then(p => p ? next() : res.json({message: 'id doesnt exist'}))
+}
 
 server.listen(5000, () => console.log("server listening on port 5000"));
