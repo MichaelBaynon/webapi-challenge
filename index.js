@@ -82,8 +82,10 @@ server.post("/api/projects/:id/actions", actionExists, (req, res) => {
   const id = req.params.id;
   const projectData = req.body;
 
+projectData.project_id = id
+
   if (
-    !projectData.project_id ||
+    
     !projectData.description ||
     !projectData.notes
   ) {
@@ -104,7 +106,7 @@ server.post("/api/projects/:id/actions", actionExists, (req, res) => {
 function actionExists(req, res,next ) {
   const postId = req.params.id
   Projects.get(postId)
-  .then(p => p ? next() : res.json({message: 'id doesnt exist'}))
+  .then(p => p ? next() : res.status(404).json({message: 'id doesnt exist'}))
 }
 
 server.listen(5000, () => console.log("server listening on port 5000"));
